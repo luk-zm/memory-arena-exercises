@@ -6,6 +6,14 @@
  * it's a problem when we want to have a struct array for exmaple
 */
 
+typedef struct Arena {
+  void *data;
+  u64 size;
+  u64 pos;
+  u64 align;
+} Arena;
+
+
 Arena *arena_alloc(u64 cap) {
   if (cap < sizeof(Arena)) {
     return NULL;
@@ -50,17 +58,20 @@ void *arena_push(Arena *arena, u64 size) {
     size = ((size / arena->align) + 1) * arena->align;
   }
   void *res = arena->data + arena->pos;
-  for (u64 i = 0; i < size; ++i) {
-    ((u8 *)res)[i] = 0;
-  }
   arena->pos += size;
   if (arena->pos >= arena->size) {
     *(int *)(0); // panic
+  }
+  for (u64 i = 0; i < size; ++i) {
+    ((u8 *)res)[i] = 0;
   }
   return res;
 }
 
 void arena_pop_to(Arena *arena, u64 pos) {
+  if (pos >= arena->pos) {
+    return;
+  }
   if (arena->align) {
     pos = ((pos / arena->align) + 1) * arena->align;
   }
@@ -68,6 +79,10 @@ void arena_pop_to(Arena *arena, u64 pos) {
 }
 
 void arena_pop(Arena *arena, u64 size) {
+  if (size >= arena->pos) {
+    arena->pos = 0;
+    return;
+  }
   arena->pos -= size;
   if (arena->align) {
     arena->pos = ((arena->pos / arena->align) + 1) * arena->align;

@@ -5,12 +5,7 @@ typedef unsigned long u64;
 typedef unsigned char u8;
 
 
-typedef struct Arena {
-  void *data;
-  u64 size;
-  u64 pos;
-  u64 align;
-} Arena;
+typedef struct Arena Arena;
 
 Arena *arena_alloc(u64 cap);
 void arena_release(Arena *arena);
