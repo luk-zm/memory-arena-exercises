@@ -7,15 +7,19 @@
 */
 
 Arena *arena_alloc(u64 cap) {
-  Arena *arena = (Arena *)malloc(sizeof(Arena));
+  if (cap < sizeof(Arena)) {
+    return NULL;
+  }
+  void *data = (void *)malloc(cap);
+  Arena *arena = (Arena *)data;
   arena->size = cap;
-  arena->data = (void *)malloc(cap);
+  arena->pos = sizeof(Arena);
+  arena->data = data;
   return arena;
 }
 
 void arena_release(Arena *arena) {
   free(arena->data);
-  free(arena);
 }
 
 void arena_set_auto_align(Arena *arena, u64 align) { arena->align = align; }
